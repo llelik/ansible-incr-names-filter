@@ -1,0 +1,45 @@
+<br><text><font size="2" color="braun"> <=============================================><br>
+<b> 
+Vserver (SVM) status [ offlined and stopped are shown ]:
+</b>
+<br> <=============================================></text><br>
+<a  onclick="myToggle('myDIV29')">Hide/Show this section</a>
+<div id="myDIV29">
+</font>
+
+
+{% if ontap_info.ontap_info.vserver_info is defined %}
+
+
+Unhealthy SVMs found:<br>
+
+{# BROKEN SVM STATUS TABLE #}
+<table border="1px" cellspacing="0" cellpadding="2" align="left" style="width: 100%"> 
+<tr> <th>SVM name</th> <th>Admin state</th> <th>Oper state</th> </tr>
+{# TABLE HEADER #}
+
+
+<tr>
+{% for svm in ontap_info.ontap_info.vserver_info.items() | sort if svm[1] | json_query("state") in bad_status -%}    {# print table #}
+
+{% set svm_astate = svm[1] | json_query("state") %}
+{% set svm_ostate = svm[1] | json_query("operational_state") %}
+
+<td><b><font size="2">    {{ svm[0] }}                     </font></b></td>
+
+{{ gocolor(svm_astate) }}
+{{ gocolor(svm_ostate) }}
+
+
+</tr>
+{% endfor -%}
+</table>
+<br>
+
+{% else %}
+{{ nosection('VServer','vserver_info') }}
+
+{% endif %}
+
+
+</div>

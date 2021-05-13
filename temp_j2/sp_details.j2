@@ -1,0 +1,45 @@
+<br><text><font size="2" color="braun"> 
+<b> 
+SP/BMC details  
+</b>
+</text><br>
+<a  onclick="myToggle('myDIV102')"> Hide/Show this section</a>
+<div id="myDIV102">
+</font>
+
+
+{% if ontap_info.ontap_info.sp_info is defined %}
+
+{# SP STATUS TABLE HEADER #}
+<table border="1px" cellspacing="0" cellpadding="2" align="left" style="width: 100%"> 
+<tr><th>Node</th> <th>SP type</th> <th>Status</th> <th>FW release</th> <th>IP address</th></tr>
+{# TABLE HEADER #}
+<tr>
+
+
+{% for sp in ontap_info.ontap_info.sp_info.items()|sort -%}
+
+{% set sp_type = sp[1] | json_query("type") -%}
+{% set sp_status = sp[1] | json_query("status") -%}
+{% set sp_fw_ver = sp[1] | json_query("firmware_version") -%}
+{% set sp_ip = sp[1] | json_query("ip_address") | json_query("ip_address") -%}
+
+<td><b><font size="2">    {{ sp[0] }}                   </font></b></td>
+<td><b><font size="2">    {{ sp_type|upper }}                   </font></b></td>
+
+{{ gocolor(sp_status) }}
+
+<td><font size="2">    {{ sp_fw_ver }}                  </font></td>
+<td><font size="2">    {{ sp_ip }}                     </font></td>
+
+</tr>
+{% endfor -%}
+
+</table>
+
+{% else %}
+{{ nosection('Service Processor (or BMC)','sp_info - na_ontap_info fork only') }}
+
+{% endif %}
+
+</div>

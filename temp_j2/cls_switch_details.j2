@@ -1,0 +1,49 @@
+<br><text><font size="2" color="braun"> <=====================><br>
+<b> 
+Cluster switch monitoring information:
+</b>
+<br> <=====================></text><br>
+<a onclick="myToggle('myDIV7')">Hide/Show this section</a>
+<div id="myDIV7">
+</font>
+
+
+{% if ontap_info.ontap_info.cl_switch_info is defined -%}
+{% set sw_present = [] %}   {# switch or switchless toggle #}
+
+
+{% for dev in ontap_info.ontap_info.cl_switch_info.items() | sort -%}
+
+{% if dev[1] | json_query('type') == 'cluster_network' -%}
+{% if sw_present.append("1") -%}{% endif -%}
+
+     <br><b>Cluster switch: </b> {{ dev[1] | json_query('device') }} <br>
+
+     {% for key, value in dev[1].items() | sort -%}
+       
+       <b>{{ key }}:</b>   
+       {% set v = dev[1] | json_query(key) %}
+       {{ gominicolor(v) }} <br>
+
+     {% endfor -%} {# values iteration #}
+
+{% endif -%}  {# if switch is cluster switch #}
+{% endfor -%}  {# all switches iteration #}
+
+
+
+{% else %}
+{{ nosection('Cluster switch','cl_switch_info - na_ontap_info fork only') }}
+
+{% endif %}
+
+
+{% if ontap_info.ontap_info.cl_switch_info is defined and sw_present|length == 0 %}  {# check for switchless configuration #}
+
+<br><font size="2" color="black">
+<b> This is switchless configuration, no cluster switch details will be shown </b>
+</font> 
+{% endif %}
+
+
+</div>

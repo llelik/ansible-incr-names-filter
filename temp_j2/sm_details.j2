@@ -1,0 +1,46 @@
+<br><text><font size="2" color="braun"> <=============================================><br>
+<b> 
+Snapmirror relationships information:
+</b>
+<br> <=============================================></text><br>
+<a  onclick="myToggle('myDIV25')">Hide/Show this section</a>
+<div id="myDIV25">
+</font>
+
+{% if ontap_info.ontap_info.snapmirror_info is defined %}
+
+
+{# SM TABLE HEADER #}
+<table border="1px" cellspacing="0" cellpadding="2" align="left" style="width: 100%"> 
+<tr> <th>Source</th> <th>Destination</th> <th>Mirror state</th> <th>Policy type</th> <th>Policy</th> <th>Relationship status</th> <th>Is healthy</th> </tr> 
+{# TABLE HEADER #}
+
+
+<br>
+
+<tr>
+{% for sm in ontap_info.ontap_info.snapmirror_info.items()| sort -%}
+  <tr>
+
+  <td><font size="2">    {{ sm[1] | json_query("source_location") }}           </font></td>
+  <td><font size="2">    {{ sm[1] | json_query("destination_location") }}      </font></td>
+  <td><font size="2">    {{ sm[1] | json_query("mirror_state") }}              </font></td>
+  <td><font size="2">    {{ sm[1] | json_query("policy_type") }}               </font></td>
+  <td><font size="2">    {{ sm[1] | json_query("policy") }}                    </font></td>
+
+  {{ gocolor(sm[1] | json_query("relationship_status")) }}
+
+  {{ gocolor(sm[1] | json_query("is_healthy")) }}
+      
+</tr>
+{% endfor -%}
+</tr>
+
+</table>
+
+{% else %}
+{{ nosection('Snapmirror','snapmirror_info') }}
+
+{% endif %}
+
+</div>

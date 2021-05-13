@@ -1,0 +1,132 @@
+<br><text><font size="2" color="braun"> <=============================================><br>
+<b> 
+Volume state information:
+</b>
+<br> <=============================================></text><br>
+<a  onclick="myToggle('myDIV18')">Hide/Show this section</a>
+<div id="myDIV18">
+</font>
+
+{% if ontap_info.ontap_info.volume_info is defined %}
+
+
+Offline volumes found:<br>
+
+{# OFFLINE VOL STATUS TABLE HEADER #}
+<table border="1px" cellspacing="0" cellpadding="2" align="left" style="width: 100%"> 
+<tr> <th>Vol name</th> <th>Vol SVM owner</th> <th>Vol home node</th> <th>Vol aggregate</th>  <th>Encryption</th> <th>Vol state</th> </tr>
+{# TABLE HEADER #}
+
+
+<tr>
+{% for vol in ontap_info.ontap_info.volume_info.items() | sort if vol[1] | json_query("volume_state_attributes") | json_query("state") == "offline" -%}    {# print table #}
+
+{% set vol_name = vol[1] | json_query("volume_id_attributes") | json_query("name") %}
+{% set vol_state = vol[1] | json_query("volume_state_attributes") | json_query("state") %}
+{% set vol_own_svm = vol[1] | json_query("volume_id_attributes") | json_query("owning_vserver_name") %}
+{% set vol_home_node = vol[1] | json_query("volume_id_attributes") | json_query("node") %}
+{% set vol_aggr = vol[1] | json_query("volume_id_attributes") | json_query("containing_aggregate_name") %}
+{% set vol_enc = vol[1] | json_query("encryption_state") %}
+
+
+<td><b><font size="2">    {{ vol_name }}                     </font></b></td>
+<td><b><font size="2">    {{ vol_own_svm }}                  </font></b></td>
+<td><font size="2">       {{ vol_home_node }}                </font></td>
+<td><font size="2">       {{ vol_aggr }}                     </font></td>
+<td><font size="2">       {{ vol_enc }}                     </font></td>
+
+{{ gocolor(vol_state) }}
+
+</tr>
+{% endfor -%}
+
+</table>
+
+<br><br><b>Volume encryption:</b><br>
+
+
+{# VOL ENC STATUS TABLE HEADER #}
+<table border="1px" cellspacing="0" cellpadding="2" align="left" style="width: 100%"> 
+<tr> <th>Vol name</th> <th>Vol SVM owner</th> <th>Encryption</th> <th>Vol state</th> </tr>
+{# TABLE HEADER #}
+
+
+
+<tr>
+{% for vol in ontap_info.ontap_info.volume_info.items()|sort if  vol[1] | json_query("encryption_state") == "none" -%}    {# print table #}
+
+{% set vol_name = vol[1] | json_query("volume_id_attributes") | json_query("name") %}
+{% set vol_state = vol[1] | json_query("volume_state_attributes") | json_query("state") %}
+{% set vol_own_svm = vol[1] | json_query("volume_id_attributes") | json_query("owning_vserver_name") %}
+{% set vol_enc = vol[1] | json_query("encryption_state") %}
+
+
+<td><b><font size="2">    {{ vol_name }}                     </font></b></td>
+<td><b><font size="2">    {{ vol_own_svm }}                  </font></b></td>
+<td><font size="2">       {{ vol_enc }}                     </font></td>
+
+{{ gocolor(vol_state) }}
+
+</tr>
+{% endfor -%}
+
+</table>
+
+{% else %}
+{{ nosection('Volume','volume_info') }}
+
+{% endif %}
+
+</div>
+
+
+<br><text><font size="2" color="braun"> <=============================================><br>
+<b> 
+Volume i-node space information:
+</b>
+<br> <=============================================></text><br>
+<a  onclick="myToggle('myDIV26')">Hide/Show this section</a>
+<div id="myDIV26">
+</font>
+
+
+{% if ontap_info.ontap_info.volume_space_info is defined %}
+
+<br>
+{# VOL INODE STATUS TABLE HEADER #}
+Volume inode usage pct >79: <br>
+<table border="1px" cellspacing="0" cellpadding="2" align="left" style="width: 100%"> 
+
+<tr> <th>Vol name</th> <th>SVM name</th> <th>Vol size used</th>  <th>Vol size available</th> <th>inode space > 79%</th> </tr>
+{# TABLE HEADER #}
+
+
+<tr>
+{% for vol in ontap_info.ontap_info.volume_space_info.items() | sort if vol[1] | json_query("inodes_percent") | int > 79 -%}  {# print table #}
+
+{% set vol_name = vol[1] | json_query("volume") %}
+{% set vol_svm = vol[1] | json_query("vserver") %}
+{% set vol_size = vol[1] | json_query("logical_used_percent") |filesizeformat %}
+{% set vol_size_avail = vol[1] | json_query("logical_available") |filesizeformat %}
+{% set vol_inode_use_pct = vol[1] | json_query("inodes_percent") %}
+
+
+<td><b><font size="2">    {{ vol_name }}                     </font></b></td>
+<td><b><font size="2">    {{ vol_svm }}                     </font></b></td>
+<td><font size="2">       {{ vol_size }}                     </font></td>
+<td><font size="2">       {{ vol_size_avail }}                     </font></td>
+<td><font size="2" color="red"  size="2">       {{ vol_inode_use_pct }}                     </font></td>
+
+</tr>
+{% endfor -%}
+
+</table>
+<br>
+
+
+{% else %}
+{{ nosection('INODE','volume_space_info - na_ontap_info fork only') }}
+
+{% endif %}
+
+</div>

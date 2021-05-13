@@ -1,0 +1,16 @@
+---
+- hosts: localhost
+  gather_facts: no
+  connection: local
+  vars:
+    ext_tasks: true
+    cdot: "3DEDA099_030_23_DOT"
+    
+  collections:
+    - netapp.ontap
+  tasks:
+    - name: run check
+      debug:
+        msg: "{{ cdot | new_name('3DEDA{XXXX,5}_030_{YY,2}DOT') }}"
+#'DEDA%X30CDOT0%YY'
+...

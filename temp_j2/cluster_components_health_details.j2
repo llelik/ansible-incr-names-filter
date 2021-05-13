@@ -1,0 +1,57 @@
+<br><text><font size="2" color="braun"> <=============================================><br>
+<b> 
+Cluster health monitoring information - !ok components && alerts found:
+</b>
+<br> <=============================================></text><br>
+<a onclick="myToggle('myDIV3')">Hide/Show this section</a>
+<div id="myDIV3">
+</font>
+
+
+
+{% if ontap_info.ontap_info.subsys_health_info is defined %}
+
+
+{% for subsys, s_prm in ontap_info.ontap_info.subsys_health_info.items() | sort -%}
+
+{% for key, value in s_prm.items()|sort -%} 
+
+{% if key == 'health' %}
+Subsystem <b>{{ subsys }}</b> has status  {{ gominicolor(value) }} <br>
+{% endif %}
+{% endfor %}
+{% endfor %}
+
+{% if ontap_info.ontap_info.sys_cluster_alerts is defined %}
+<b> Corresponding alert messages: </b> <br>
+{% for subsys_degr, item in ontap_info.ontap_info.sys_cluster_alerts.items() | sort -%} 
+  {% for k, v in item.items() | sort -%}
+    {% if k in alert_2print -%}
+
+      {% if k == "indication_time" -%}
+           <br><b> {{ k }}:</b> {{ v }} 
+      {% else %}
+           <br><b> {{ k }}:</b> {{ v | trim | replace("\n","<br>") }}
+      {% endif %}
+
+    {% endif %}
+  {% endfor -%}
+  <br><br>
+{% endfor -%}
+
+{% else %}
+<br><font color="green">
+<b> 
+No alerts reported by the cluster.
+</b>
+</font>
+
+{% endif %}
+
+{% else %}
+{{ nosection('Cluster alerts','sys_cluster_alerts - na_ontap_info fork only') }}
+
+{% endif %}
+
+
+</div>

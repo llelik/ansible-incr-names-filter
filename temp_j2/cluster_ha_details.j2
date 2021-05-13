@@ -1,0 +1,86 @@
+<br><text><font size="2" color="braun"> <=====================><br>
+<b> 
+Cluster HA information:
+</b>
+<br> <=====================> </text><br>
+<a onclick="myToggle('myDIV13')"> Hide/Show this section</a>
+<div id="myDIV13">
+</font>
+
+{% if ontap_info.ontap_info.storage_failover_info is defined %}
+
+
+<br><text><font size="2" color="black"> <br>
+<b>    Node status:    </b>
+<br></text><br>
+
+
+{# HA STATUS TABLE HEADER #}
+<table border="1px" cellspacing="0" cellpadding="2" align="left" style="width: 100%"> 
+
+<tr> <th>Node</th> <th>Interconn UP</th> <th>Connectivity</th> <th>Givback status</th> <th>Takeover possible</th> </tr>
+{# TABLE HEADER #}
+
+<tr>
+
+{% for node in ontap_info.ontap_info.storage_failover_info.items() | sort -%}
+
+{% set interconn = node[1] | json_query("sfo_interconnect_info") | json_query("interconnect_related_info") | json_query("is_interconnect_up") %}
+{% set conn_state = node[1] | json_query("sfo_node_info") | json_query("node_related_info") | json_query("state_description") %}
+{% set gb_state = node[1] | json_query("sfo_giveback_info") | json_query("giveback_related_info") | json_query("giveback_state") %}
+{% set tover = node[1] | json_query("sfo_takeover_info") | json_query("takeover_related_info") | json_query("takeover_by_partner_possible") %}
+
+
+<td><b><font size="2">    {{ node[0] }}                   </font></b></td>
+
+{{ gocolor(interconn) }}
+
+<td><font size="2">    {{ conn_state }}      </font></td>
+<td><font size="2">    {{ gb_state }}   </font></td>
+
+{{ gocolor(tover) }}
+ 
+</tr>
+
+{% endfor %}
+</table>
+
+
+<br><text><font size="2" color="black"> <br>
+<b>    Node configuration (options setup):    </b>
+<br></text><br>
+
+{# HA OPTIONS TABLE #}
+<table border="1px" cellspacing="0" cellpadding="2" align="left" style="width: 100%"> 
+
+<tr> <th>Node</th> <th>Autogiveback enabled</th> <th>Failover enabled</th> <th>HA mode</th> </tr>
+{# TABLE HEADER #}
+
+
+<tr>
+
+{% for n in ontap_info.ontap_info.storage_failover_info.items() | sort -%}
+
+{% set opt_agb = n[1] | json_query("sfo_options_info") | json_query("options_related_info") | json_query("auto_giveback_enabled") %}
+{% set opt_fover = n[1] | json_query("sfo_options_info") | json_query("options_related_info") | json_query("failover_enabled") %}
+{% set opt_hamode = n[1] | json_query("sfo_options_info") | json_query("options_related_info") | json_query("ha_mode") %}
+
+
+<td><b><font size="2">    {{ n[0] }}                   </font></b></td>
+
+{{ gocolor(opt_agb) }}
+
+{{ gocolor(opt_fover) }}
+
+<td><font size="2">    {{ opt_hamode }}      </font></td>
+
+</tr>
+
+{% endfor %}
+</table>
+
+{% else %}
+{{ nosection('Cluster High Availability','storage_failover_info') }}
+
+{% endif %}
+</div>

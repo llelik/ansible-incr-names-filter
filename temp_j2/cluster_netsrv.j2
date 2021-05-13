@@ -1,0 +1,43 @@
+<br><text><font size="2" color="braun"> <=============================================><br>
+<b> 
+Network service status [CIFS, NFS]:
+</b>
+<br> <=============================================></text><br>
+
+<a  onclick="myToggle('myDIV14')">Hide/Show this section</a>
+<div id="myDIV14">
+</font>
+
+{% if netsrv and ext_cls_netsrv | bool %} 
+
+
+
+{% for item in netsrv | json_query('results') -%}
+<br><b>Node: </b> {{ item['item'] }} <br> 
+
+<b>Services: </b><br>
+
+{# NET SERVICES STATUS TABLE HEADER #}
+<table border="1px" cellspacing="0" cellpadding="2" align="left" style="width: 100%"> 
+<tr> <th>Vserver Name</th> <th>Interface Name:Local Port</th> <th>Protocol/Service</th> </tr>
+{# TABLE HEADER #}
+
+   {% for line in (item | json_query("msg") | json_query("stdout_lines"))[2:-1] -%}
+     <tr>
+       {% for l in line.split() -%}
+            <td> {{ l }} </td>
+       {% endfor -%}
+     </tr>
+   {% endfor -%}
+</table>
+<br>
+
+{% endfor -%}
+
+
+{% else %}
+{{ nosection('Data network services','netsrv') }}
+
+{% endif %}
+
+</div>

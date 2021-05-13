@@ -1,0 +1,224 @@
+{# NetApp ONTAP cluster health check template #}
+{# Last updated: 03.01.2020 #}
+
+{% set sysnode_prms = ['is_epsilon_node','is_node_cluster_eligible','node_location'] -%}
+{% set sp_prms = ['firmware_version', 'ip_address','is_ip_configured','status','type'] -%}
+{% set alert_2print = ['probable_cause_description','alert_id', 'alerting_resource_name','indication_time', 'monitor'] -%}
+{% set net_port_prms = ['health_status','link_status','is_administrative_up'] -%}
+
+
+{% set tmp_port_prms = ({
+"portname":"", 
+"health_status":"", 
+"link_status":"", 
+"is_administrative_up": ""})
+-%}
+{% set tmp_lif_prms = ({
+"interface_name":"", 
+"home_node":"", 
+"home_port": "",
+"operational_status":"",
+"is_home":"" })
+-%}
+
+
+{#  --------------- STATUS INFO DECLARATION --------------  #}
+{% set bad_status =   ['offline','degraded','-', 'down', 'partial', 'false','inactive','stopped'] -%}
+{% set ok_status =    ['online','up','healthy','GOOD','PASS', 'full', 'true', 'insync', 'normal','active','ok','running'] -%}
+{# --------------- END STATUS INFO DECLARATION -----------  #}
+
+{#  --------------- AGGR INFO DECLARATION ----------------  #}
+{% set aggr_prms =            ['node_name','state','raid_status','owner_name','home_name','percent_used_capacity'] -%}
+{% set aggr_lookup_section =  ['aggr_raid_attributes','aggr_space_attributes','aggr_ownership_attributes'] -%}
+{# --------------- END AGGR INFO DECLARATION -------------  #}
+
+
+{#  --------------- SHELF INFO DECLARATION ---------------  #}
+{% set psu_power =    ['psu-location','psu-op-status','controller','initiator','module-fw-revision','module-id'] -%}
+{% set psu_prms =     ['power_supply_units', 'paths','shelf_modules'] %}
+{% set shelf_prms =   ['shelf_id','disk_count','op_status','connection_type','state','shelf_model','serial_number'] -%}
+{# --------------- END SHELF INFO DECLARATION ------------  #}
+
+
+{#  --------------- DISK INFO DECLARATION ---------------  #}
+{% set disk_ok_type = ['shared','aggregate','spare'] -%}
+{#  --------------- DISK INFO DECLARATION ---------------  #}
+
+
+{%- macro gocolor(data) -%}
+
+{%- if data in ok_status -%}
+     <td><b><font color="green" size="2" > {{ data }} </td></font></b>
+  {%- elif data in bad_status -%}
+     <td><b><font color="red" size="3" > {{ data }} </td></font></b>
+  {%- else -%}
+       <td><b><font color="black" size="2" > {{ data }} </td></font></b>
+  {%- endif -%}
+
+{%- endmacro -%}
+
+{% macro gominicolor(data) -%}
+
+{%- if data in ok_status -%}
+     <b><font color="green" size="2" > {{ data }} </font></b>
+  {% elif data in bad_status -%}
+     <b><font color="red" size="3" > {{ data }} </font></b>
+  {% else -%}
+       <b><font color="black" size="2" > {{ data }} </font></b>
+  {% endif -%}
+
+{%- endmacro %}
+
+
+{%- macro nosection(section,subset) -%}
+
+<br><font color="red">
+<b> 
+{{ section }} details have not been shown due to missing data ({{ subset }}) <br>
+</b>
+</font> 
+
+{%- endmacro -%}
+  
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>NetApp cluster health checks</title>
+</head>
+<body>
+
+<script>
+function myToggle(id) {
+  var x = document.getElementById(id);
+  if (x.style.display === "none") {
+    x.style.display = "block";
+  } else {
+    x.style.display = "none";
+  }
+}
+</script>
+
+
+{# DOCUMENT HEADER #}
+<br><text><center><font size="3" color="black"> 
+<================================================================><br>
+<b> Cluster: {% if ontap_info.ontap_info.cluster_identity_info is defined %}
+       {{ lookup('dict',ontap_info.ontap_info.cluster_identity_info).key }} <br>
+Report generated at: <br>
+Time: {{ lookup('pipe','date +%H:%M:%S') }}
+Date: {{ lookup('pipe','date +%d-%m-%Y') }}
+
+</b></center></font></text>
+{% endif %}
+{# DOCUMENT HEADER #}
+
+
+
+
+{% include "cluster_overview.j2" %}
+{% include "node_details.j2" %}
+{% include "sp_details.j2" %}
+{% include "cls_switch_details.j2" %}
+{% include "shelf_details.j2" %}
+
+
+
+<br><text><center><font size="4" color="blue"> 
+<================================================================><br>
+<b> 
+CLUSTER COMPONENTS' HEALTH OVERVIEW
+</b> <br>
+<================================================================></center></text></font><br>
+
+
+
+{% include "cluster_components_health_details.j2" %}
+{% include "cluster_ha_details.j2" %}
+{% include "cluster_ring.j2" %}
+
+
+<br><text><center><font size="4" color="blue"> 
+<================================================================><br><b> 
+CLUSTER DATA NETWORK OVERVIEW [PORTs, LIFs]
+</b> <br><================================================================></center></text></font><br>
+
+
+
+{% include "cluster_netsrv.j2" %}
+{% include "ifgrp_details.j2" %}
+{% include "unhealthy_lif_details.j2" %}
+
+
+
+
+<br><text><center><font size="4" color="blue"> 
+<================================================================><br>
+<b> 
+CLUSTER CABLING OVERVIEW [CUSTER NETWORK, SAS NETWORK]
+</b> <br>
+<================================================================></center></text></font><br>
+
+
+{% include "sas_expander_map.j2" %}
+{% include "cluster_ping.j2" %}
+
+
+<br><text><center><font size="4" color="blue"> 
+<================================================================><br>
+<b> 
+CLUSTER DATA STORAGE OVERVIEW [AGGR, DISK]
+</b> <br>
+<================================================================></center></text></font><br>
+
+{% include "disk_details.j2" %}
+{% include "aggr_details.j2" %}
+
+
+
+<br><text><center><font size="4" color="blue"> 
+<================================================================><br>
+<b> 
+CLUSTER VSERVER, VOLUME and SNAPMIRROR status [SVM, VOL, SM]
+</b> <br>
+<================================================================></center></text></font><br>
+
+
+{% include "volume_details.j2" %}
+{% include "svm_details.j2" %}
+{% include "sm_details.j2" %}
+
+
+
+<br><text><font size="2" color="braun"> <=============================================><br>
+<b> 
+Volume snapshot information:
+</b>
+<br> <=============================================></text><br>
+<a  onclick="myToggle('myDIV22')">Hide/Show this section</a>
+<div id="myDIV22">
+</font>
+
+
+NOT YET IMPLEMENTED
+
+</div>
+
+
+
+
+
+<center>
+<br><text> 
+<============= REPORT FOR !!!!!!!  
+                                              {% if ontap_info.ontap_info.cluster_identity_info is defined %}
+                                              {{ lookup('dict',ontap_info.ontap_info.cluster_identity_info).key }}   {% endif %}
+!!!!!! ENDS HERE ====================>
+</text><br>
+
+<br><text> <=Credits: alexey.mikhaylov@netapp.com =></text><br>
+</center>
+
+
+</body></html>

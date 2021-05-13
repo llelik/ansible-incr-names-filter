@@ -1,0 +1,44 @@
+<br><text><font size="2" color="braun"> <=============================================><br>
+<b> 
+Node all UN-healthy port status:
+</b>
+<br> <=============================================></text><br>
+<a  onclick="myToggle('myDIV4')">Hide/Show this section</a>
+<div id="myDIV4">
+</font>
+
+
+{% if ontap_info.ontap_info.net_port_info is defined %}
+
+{# BROKEN PORT TABLE HEADER #}
+<table border="1px" cellspacing="0" cellpadding="2" align="left" style="width: 100%">  
+<tr> <th>Port</th> <th>Health status</th> <th>Administrative up</th> <th>Link status</th> </tr> 
+{# TABLE HEADER #}
+
+
+<br>
+
+{% for p in ontap_info.ontap_info.net_port_info.items() | sort if p[1] | json_query("link_status") in bad_status or p[1] | json_query("health_status")  in bad_status -%}
+
+
+  <tr>
+  <td><font size="2">    {{ p[0] }}                                         </font></td>
+
+  {{ gocolor(p[1] | json_query("health_status")) }}
+
+  {{ gocolor(p[1] | json_query("is_administrative_up")) }}
+    
+  {{ gocolor(p[1] | json_query("link_status")) }}
+    
+</tr>
+{% endfor -%}
+</tr>
+</table>
+
+
+{% else %}
+{{ nosection('Network port','net_port_info') }}
+
+{% endif %}
+
+</div>

@@ -1,0 +1,48 @@
+<br><text><font size="2" color="braun"> 
+<=============================================><br>
+<b> 
+Cluster ping:
+</b> <br>
+<=============================================></text><br>
+<a  onclick="myToggle('myDIV0')">Hide/Show this section</a>
+<div id="myDIV0">
+</font>
+
+{% if clusterping and ext_cls_ping | bool %}
+
+
+
+{% for h in clusterping | json_query('results') -%}
+
+<b>Node {{ h['item'] }} ping test: </b><br>
+
+
+{% if "fails on 0 path" not in h | json_query("msg") | json_query("stdout") %}
+<font size="2" color="red"><b> {{ line | trim | replace("\n","<br>") }} <br> == cluster reports on some paths down - please check manually 
+</b></font><br>
+
+{% elif "fails on 0 path" in h | json_query("msg") | json_query("stdout") %}
+<font size="2" color="green"> Cluster ping from host is OK, no down paths found
+<br>
+ 
+</font><br>
+
+{% else %}
+<font size="2" color="red"> no test has been performed? 
+</font><br>
+
+{% endif %}
+<br>
+{% endfor %}
+
+
+{% else %}
+{{ nosection('Cluster ping','clsping') }}
+
+{% endif %}
+
+<br><text><font size="2" color="braun"> 
+END cluster ping section.
+</b> <br>
+<=============================================></font></text><br>
+</div>

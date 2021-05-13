@@ -1,0 +1,41 @@
+<br><text><font size="2" color="braun"> <=====================><br>
+<b> 
+Cluster ring information   [ VLDB, MGMT, VIFMGR, BCOMD ]:
+</b>
+<br> <=====================> </text><br></font>
+<a  onclick="myToggle('myDIV12')"> Hide/Show this section</a>
+<div id="myDIV12">
+
+
+{% if clsring is defined and ext_cls_ring | bool -%}
+
+
+{% for item in clsring | json_query('results') -%}
+<br><b>Database unit: </b> {{ item['item'] }} <br> 
+
+<b>Ring: </b><br>
+
+{# CLS RING STATUS TABLE HEADER #}
+<table border="1px" cellspacing="0"> 
+<b><tr> <th>Node</th> <th>Unit name</th> <th>Master node</th> </tr></b>
+{# TABLE HEADER #}
+
+   {% for line in (item | json_query("msg") | json_query("stdout_lines"))[2:] -%}
+       <tr>
+       {% for l in line.split() -%}
+               <td> {{ l }} </td>
+       {% endfor -%}
+       </tr>
+   {% endfor -%}
+</table>
+<br>
+
+{% endfor -%}
+
+{% else -%}
+{{ nosection('Cluster ring','clsring') }}
+
+{% endif -%}
+
+
+</div>

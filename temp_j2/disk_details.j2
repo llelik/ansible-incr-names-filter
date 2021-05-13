@@ -1,0 +1,66 @@
+<br><text><font size="2" color="braun"> <=============================================><br>
+<b> 
+Disk status information:
+</b>
+<br> <=============================================></text><br>
+<a  onclick="myToggle('myDIV15')">Hide/Show this section</a>
+<div id="myDIV15">
+</font>
+
+{% if ontap_info.ontap_info.disk_info is defined %}
+
+{% set bad_disks = [] %}
+{% set d1d2_disks = [] %}
+
+
+{%- for disk in ontap_info.ontap_info.disk_info.items() | sort -%}
+
+{% set cont_type = disk[1] | json_query("disk_raid_info") | json_query("container_type") -%}
+{% set dsk_position = disk[1] | json_query("disk_raid_info") | json_query("position") -%}
+{% set d1_owner = disk[1] | json_query("disk_ownership_info") | json_query("data1_owner") -%}
+{% set d2_owner = disk[1] | json_query("disk_ownership_info") | json_query("data2_owner") -%}
+
+
+{% if cont_type not in disk_ok_type or dsk_position not in disk_ok_type -%}
+
+{% if bad_disks.append(disk[0]) %}{% endif %}
+
+Disk {{ disk[0] }} assigned to {{ disk[1] | json_query("disk_raid_info") | json_query("active_node_name") }} is 
+      <font size="3" color="red"> <b>{{ cont_type }} <br> </b></font> 
+
+{% endif -%}
+
+
+{% if d1_owner == d2_owner -%}                {########## check for both data partitions owned by disfferent nodes #############}
+{% if d1d2_disks.append(disk[0]) %}{% endif %}    {#### a hack to save disks with wrong partitioning #######}
+{% endif -%}                                  {########## check for both data partitions owned by disfferent nodes END IF ######}
+
+{% endfor -%} {#### end iter disks ####}
+
+
+{% if not d1d2_disks -%}
+
+{% else %}
+<font size="2" color="red"> <b>
+List of disks with data P1 and P2 partitions on the same disk drive - ALERT : 
+</b></font> 
+
+{{ d1d2_disks | to_nice_yaml }} <br> 
+{% endif %}
+
+{% if not bad_disks and not d1d2_disks -%}
+
+<br><font color="green">
+<b> No suspicious disks were identified. <br>
+{{ ontap_info.ontap_info.disk_info|length }} drives were found healthy and assigned. <br> </b>
+</font> 
+
+{% endif %}
+
+{% else %}
+{{ nosection('Disk','disk_info - na_ontap_info fork only') }}
+
+{% endif %}  {#  endif if the section not defined   #}
+
+
+</div>

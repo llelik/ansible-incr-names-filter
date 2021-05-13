@@ -1,0 +1,21 @@
+<br><text><font size="2" color="braun"> <=====================><br>
+<b> 
+Expander map information:
+</b>
+<br> <=====================></text><br>
+<a  onclick="myToggle('myDIV10')">Hide/Show this section</a>
+<div id="myDIV10">
+</font>
+
+
+{% if expandermap and ext_sas_expander | bool -%}
+   {% for line in expandermap | json_query('msg') | json_query('stdout_lines') -%}
+      {{ line }} <br>
+   {% endfor %}
+
+{% else -%}
+{{ nosection('SAS Expander map','expandermap') }}
+
+{% endif -%}
+
+</div>

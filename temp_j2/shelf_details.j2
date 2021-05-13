@@ -1,0 +1,94 @@
+<br><text><font size="2" color="braun"> <=====================><br>
+<b> 
+Shelf components section information:
+</b>
+<br> <=====================></text><br>
+<a onclick="myToggle('myDIV9')">Hide/Show this section</a>
+<div id="myDIV9">
+</font>
+
+
+
+{% if ontap_info.ontap_info.shelf_info is not defined %}
+{{ nosection('Disk shelf','shelf_info - na_ontap_info fork only') }}
+
+{% else %}
+
+{# SHELF TABLE HEADER #}
+<table border="1px" cellspacing="0" cellpadding="2" align="left" style="width: 100%"> 
+<tr>
+<th>Shelf SN</th> <th>ID</th> <th>Connected to</th> <th>Disk count</th> <th>Shelf model</th> <th>State</th> <th>Oper status</th> <th>Type</th> <th>IOM FW</th> <th>IOM state</th> </tr>
+{# TABLE HEADER #}
+
+
+<tr>
+
+{% for shlf in ontap_info.ontap_info.shelf_info.items() | sort -%}
+
+
+{% set ssn = shlf[1] | json_query("serial_number") -%}
+{% set shlf_id = shlf[1] | json_query("shelf_id") -%}
+{% set disk_count = shlf[1] | json_query("disk_count")  -%}
+{% set shelf_model = shlf[1] | json_query("shelf_model")  -%}
+{% set shlf_state = shlf[1] | json_query("state")  -%}
+{% set op_status = shlf[1] | json_query("op_status")  -%}
+{% set conn_type = shlf[1] | json_query("connection_type") -%}
+
+
+<td><b><font size="2">    {{ ssn }}                   </font></b></td>
+<td><b><font size="2">    {{ shlf_id }}                   </font></b></td>
+
+<td><b><font size="2">    
+{% for ctl in shlf[1].paths.storage_shelf_path_info -%}
+   {% for k,v in ctl.items()|sort if k == "controller" -%}
+   {{ v }}
+   {% endfor -%}
+{% endfor -%}
+</font></b></td>
+
+<td><b><font size="2">    {{ disk_count }}                   </font></b></td>
+<td><b><font size="2">    {{ shelf_model }}                   </font></b></td>
+
+{{ gocolor(shlf_state) }}
+{{ gocolor(op_status) }}
+
+<td><b><font size="2">    {{ conn_type|upper }}                   </font></b></td>
+
+<td><b><font size="2">    
+{% for ctl in shlf[1].shelf_modules.storage_shelf_module_info -%}
+
+   {% for k,v in ctl.items()|sort if k == "module-id" %}
+             IOM-{{ v|upper }}, 
+   {% endfor -%}
+   {% for k,v in ctl.items()|sort if k == "module-fw-revision" -%}
+             FW: {{ v }} |
+    {% endfor -%}
+
+{% endfor -%}
+</font></b></td>
+
+<td><b><font size="2">    
+{% for ctl in shlf[1].shelf_modules.storage_shelf_module_info -%}
+
+   {% for k,v in ctl.items()|sort if k == "module-id" %}
+             IOM-{{ v|upper }}: 
+   {% endfor -%}
+   {% for k,v in ctl.items()|sort if k == "module-op-status" -%}
+             {{ gominicolor(v) }} |
+   {% endfor -%}
+ 
+{% endfor -%}
+</font></b></td>
+
+
+
+</tr>
+
+{% endfor -%}
+</table>
+
+ 
+{% endif %}
+
+
+</div>

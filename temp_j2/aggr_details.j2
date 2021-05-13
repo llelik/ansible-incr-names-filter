@@ -1,0 +1,62 @@
+<br><text><font size="2" color="braun"> <=============================================><br>
+<b> 
+Aggregate status information:
+</b>
+<br> <=============================================></text><br>
+<a  onclick="myToggle('myDIV11')">Hide/Show this section</a>
+<div id="myDIV11">
+</font>
+
+{% if ontap_info.ontap_info.aggregate_info is defined %}
+
+{% for a in ontap_info.ontap_info.aggregate_info.items() | sort -%}
+
+
+{% if a[1].aggr_raid_attributes.is_root_aggregate == "true" %}
+   <b>{{ a[0] }} [ROOT AGGR]:</b><br><br>
+{% else %} {# condition root/data separation #}
+   <b>{{ a[0] }} [DATA AGGR]:</b><br><br>
+{% endif %}
+
+{% for i in aggr_lookup_section %}
+  {% for j in aggr_prms %}
+
+    {% set res = a[1][i] | json_query(j) %}
+
+       {% if res %}
+          {% if res in ok_status %}
+            {{ j }} = <b><font color="green"> {{ res }} </font></b> <br>
+          {% elif res in bad_status %}
+            {{ j }} = <b><font color="red"> {{ res }} </font></b> <br>
+          {% else %}
+            
+               {% if j == 'percent_used_capacity' and res|int > 75 %}
+                  <b><font color="red" size="2"> percent_used_capacity > 75 in {{ a[0] }} </font></b>   <br> 
+               {% else %} 
+                  {{ j }} = {{ res }} <br>
+               {% endif %}
+
+          {% endif %}
+       {% endif %}
+
+  {% endfor %} {# j #}
+{% endfor %} {# i #}
+
+<br>
+
+{% endfor %} {# end for a iteration #}
+
+{% else %}
+{{ nosection('Aggregate','aggr_info') }}
+
+
+{% endif %}  {#  endif if not defined   #}
+
+
+<br><text><font size="2" color="braun"> <=============================================><br>
+<b> 
+END Aggregate section
+</b>
+<br> <=============================================></font></text><br>
+
+</div>

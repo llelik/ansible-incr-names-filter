@@ -1,0 +1,47 @@
+<br><text><font size="2" color="braun"> <=============================================><br>
+<b> 
+Interface group status:
+</b>
+<br> <=============================================></text><br>
+<a  onclick="myToggle('myDIV16')">Hide/Show this section</a>
+<div id="myDIV16">
+</font>
+
+{% if ontap_info.ontap_info.net_ifgrp_info is defined %}
+
+
+{# IFGRP TABLE HEADER #}
+<table border="1px" cellspacing="0" cellpadding="2" align="left" style="width: 100%"> 
+
+<tr> <th>IFGRP</th> <th>Status</th> <th>Port list</th> <th>UP ports</th> <th>Mode</th> <th>Distribution</th> </tr>
+{# TABLE HEADER #}
+
+
+
+<tr>
+{% for ifgrp in ontap_info.ontap_info.net_ifgrp_info.items() | sort -%}
+  <tr>
+  <td><font size="2">    {{ ifgrp[0] }}                                         </font></td>
+
+ {{ gocolor(ifgrp[1] | json_query("port_participation")) }}
+  
+  <td><font size="2">    {{ ifgrp[1] | json_query("ports") | json_query("lif_bindable") | to_nice_yaml }}      </font></td>
+  <td><font size="2">    {{ ifgrp[1] | json_query("up_ports") | json_query("lif_bindable") | to_nice_yaml }}   </font></td>
+  <td><font size="2">    {{ ifgrp[1] | json_query("mode") }}                                    </font></td>
+  <td><font size="2">    {{ ifgrp[1] | json_query("distribution_function") }}                   </font></td>
+
+  
+</tr>
+{% endfor %}
+</tr>
+
+</table>
+
+
+
+
+{% else%}
+{{ nosection('Interface groups','net_ifgrp_info') }}
+
+{% endif %}
+</div>

@@ -1,0 +1,52 @@
+<br><text><center><font size="4" color="blue"> 
+<================================================================><br>
+<b> CLUSTER HARDWARE COMPONENTS OVERVIEW <br></b>
+
+{% if ontap_info.ontap_info.system_node_info is defined %}
+
+
+{# HW COMPONENTS TABLE HEADER #}
+<table border="1px" cellspacing="0" cellpadding="2" width="1000" align="center"> 
+<tr>
+<th>Node or switch</th> <th>Model</th> <th>SSN</th> <th>Uptime (Unix)</th> <th>Is healthy</th> </tr> 
+{# TABLE HEADER #}
+
+<tr>
+{% for node in ontap_info.ontap_info.system_node_info.items() | sort -%}
+  <tr>
+  <td><font size="2">    {{ node[0] }}                                         </font></td>
+  <td><font size="2">    {{ node[1] | json_query("node_model") }}              </font></td>
+  <td><font size="2">    {{ node[1] | json_query("node_serial_number") }}      </font></td>
+  <td><font size="2">    {{ node[1] | json_query("node_uptime") }}             </font></td>
+
+  {{ gocolor(node[1] | json_query("is_node_healthy")) }}
+
+</tr>
+{% endfor %}
+
+
+{% if ontap_info.ontap_info.cl_switch_info is defined %}
+  {% for sw in ontap_info.ontap_info.cl_switch_info.items() | sort -%}
+    
+
+    {% if sw[1] | json_query("type") == "cluster_network" %}
+       <tr>
+       <td><font size="2">    {{ sw[1] | json_query("device") }}          </font></td>
+       <td><font size="2">    {{ sw[1] | json_query("model") }}           </font></td>
+       <td><font size="2">    {{ sw[1] | json_query("serial_number") }}   </font></td>
+       <td><font size="2">    N.A.                                        </font></td>
+       <td><font size="2">    N.A.                                        </font></td>
+  
+
+    {% endif %}
+
+
+  {% endfor %}
+{% endif %}
+
+</tr>
+
+</table>
+{% endif %}
+
+ </center></text></font>

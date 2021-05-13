@@ -1,0 +1,46 @@
+<br><text><font size="2" color="braun"> <=============================================><br>
+<b> 
+Node all UN-healthy LIF status:
+</b>
+<br> <=============================================></text><br>
+<a  onclick="myToggle('myDIV6')">Hide/Show this section</a>
+<div id="myDIV6">
+</font>
+
+
+{% if ontap_info.ontap_info.net_interface_info is defined %}
+
+
+{# NET INT SHOW TABLE HEADER #}
+<table border="1px" cellspacing="0" cellpadding="2" align="left" style="width: 100%"> 
+<tr> <th>LIF name</th> <th>Home node</th> <th>Home port</th> <th>Role</th>  <th>Protocol</th> <th>Is at home</th> <th>Oper status</th> </tr> 
+{# TABLE HEADER #}
+
+<br>
+
+{% for lif in ontap_info.ontap_info.net_interface_info.items() | sort if lif[1] | json_query("operational_status")  in bad_status or lif[1] | json_query("is_home") in bad_status -%}
+
+  <tr>
+  <td><font size="2">    {{ lif[0] }}                                         </font></td>
+  <td><font size="2">    {{ lif[1] | json_query("home_node") }}                   </font></td>
+  <td><font size="2">    {{ lif[1] | json_query("home_port") }}                   </font></td>
+  <td><font size="2">    {{ lif[1] | json_query("role") }}                   </font></td>
+  <td><font size="2">    {{ lif[1] | json_query("data_protocols") | json_query("data_protocol") | to_nice_yaml }}                   </font></td>
+
+ {{ gocolor(lif[1] | json_query("is_home")) }}
+    
+ {{ gocolor(lif[1] | json_query("operational_status")) }}
+
+</tr>
+{% endfor -%}
+</tr>
+
+</table>
+
+
+{% else %}
+{{ nosection('Network interface','net_interface_info') }}
+
+{% endif %}
+
+</div>
